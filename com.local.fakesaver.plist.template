@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.fakesaver</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PYTHON__</string>
+        <string>__DIR__/fakesaver_watchdog.py</string>
+        <string>180</string>
+        <!-- 可选: 再加一行 <string>/path/to/image.png</string> 使用图片模式 -->
+    </array>
+    <key>WorkingDirectory</key>
+    <string>__DIR__</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/fakesaver_watchdog.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/fakesaver_watchdog.log</string>
+</dict>
+</plist>
