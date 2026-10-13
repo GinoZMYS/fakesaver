@@ -4,6 +4,8 @@
 
 > A fake screensaver for macOS: it doesn't trigger the real screensaver — it just covers every display with a fullscreen image (or a clock). Auto-starts after keyboard/mouse idle, and quits instantly on any input, exactly like a real screensaver.
 
+![时钟模式效果(双屏各自全屏覆盖)](screenshot.png)
+
 ## 特性
 
 - 🖥️ **多屏全覆盖**:自动枚举所有显示器,每块屏幕独立全屏窗口(基于 CoreGraphics)
