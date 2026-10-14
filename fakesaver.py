@@ -67,6 +67,21 @@ def get_displays():
         return None
 
 
+def idle_seconds():
+    """系统级键鼠闲置秒数(CoreGraphics)。
+    合成事件(如全屏 Space 切换产生的光标瞬移)不会重置该计数,
+    真实用户输入才会。读取失败返回 0(按有输入处理,宁可退出)。"""
+    try:
+        cg = ctypes.cdll.LoadLibrary(
+            "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+        cg.CGEventSourceSecondsSinceLastEventType.restype = ctypes.c_double
+        cg.CGEventSourceSecondsSinceLastEventType.argtypes = [
+            ctypes.c_int, ctypes.c_uint32]
+        return cg.CGEventSourceSecondsSinceLastEventType(0, 0xFFFFFFFF)
+    except Exception:
+        return 0.0
+
+
 class FakeSaver:
     def __init__(self, image_path=None):
         self.root = tk.Tk()
@@ -157,6 +172,11 @@ class FakeSaver:
         dx = abs(event.x - self._start_pos[0])
         dy = abs(event.y - self._start_pos[1])
         if dx > MOVE_THRESHOLD or dy > MOVE_THRESHOLD:
+            # 系统闲置时间仍很长,说明这不是真实用户输入
+            # (全屏切换残留的合成事件),忽略
+            if idle_seconds() > GRACE_SECONDS:
+                self._start_pos = (event.x, event.y)
+                return
             self.quit()
 
     def quit(self):
