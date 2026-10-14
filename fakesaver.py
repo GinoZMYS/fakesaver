@@ -37,6 +37,9 @@ from PIL import Image, ImageTk
 
 # 鼠标移动超过该像素阈值才退出(避免传感器微小抖动误触发)
 MOVE_THRESHOLD = 15
+# 启动后的宽限期:窗口进入全屏 Space 时 macOS 会产生鼠标位移事件,
+# 此期间的移动不视为用户退出意图
+GRACE_SECONDS = 2.0
 
 
 def get_displays():
@@ -86,6 +89,7 @@ class FakeSaver:
             self._cover(top, geo, primary=False)
 
         self._start_pos = None
+        self._born = time.monotonic()  # 宽限期计时起点
         for w in [self.root] + self.root.winfo_children():
             for seq, cb in (("<Key>", lambda e: self.quit()),
                             ("<Button>", lambda e: self.quit()),
@@ -143,6 +147,10 @@ class FakeSaver:
         self.root.after(1000, self._tick)
 
     def _on_motion(self, event):
+        # 宽限期内只记录基准位置,不触发退出
+        if time.monotonic() - self._born < GRACE_SECONDS:
+            self._start_pos = (event.x, event.y)
+            return
         if self._start_pos is None:
             self._start_pos = (event.x, event.y)
             return

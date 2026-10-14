@@ -48,10 +48,14 @@ def main():
     cmd = [sys.executable, str(SAVER)] + ([image] if image else [])
 
     print(f"[watchdog] 闲置超过 {threshold:.0f} 秒将启动假屏保,每 {POLL_INTERVAL} 秒检查一次")
+    armed = True  # 只有闲置曾回落到阈值以下才允许再次触发,避免崩溃循环刷进程
     while True:
         time.sleep(POLL_INTERVAL)
         idle = idle_seconds()
-        if idle >= threshold and not saver_running():
+        if idle < threshold:
+            armed = True
+            continue
+        if armed and not saver_running():
             print(f"[watchdog] 闲置 {idle:.0f}s ≥ {threshold:.0f}s,启动假屏保")
             subprocess.Popen(
                 cmd,
@@ -59,6 +63,7 @@ def main():
                 stderr=subprocess.DEVNULL,
                 env={**dict(__import__("os").environ), "FAKESAVER_TK_CHECKED": "1"},
             )
+            armed = False  # 等待用户活动(idle 回落)后再重新待命
 
 
 if __name__ == "__main__":
